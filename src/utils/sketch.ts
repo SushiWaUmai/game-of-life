@@ -20,7 +20,7 @@ export const setup = (p5: p5Types) => {
   p5.fill(255);
 
   randomize();
-  // p5.frameRate(30);
+  p5.frameRate(30);
 
   p5.keyReleased = () => {
     switch (p5.key) {
@@ -138,8 +138,6 @@ export const draw = (p5: p5Types) => {
     const mouseY = Math.floor((p5.mouseY * height) / p5.height);
     cells[index(mouseX, mouseY)] = p5.mouseButton === p5.LEFT ? 1 : 0;
   }
-
-  console.log(p5.frameRate());
 
   paint(p5);
 };
