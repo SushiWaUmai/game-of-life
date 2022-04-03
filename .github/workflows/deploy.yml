@@ -18,18 +18,25 @@ jobs:
     steps:
       - name: Get files
         uses: actions/checkout@v2
+
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node-version }}
+
+      - uses: pnpm/action-setup@v2.1.0
+        with:
+          version: latest
+
       - name: Install packages
-        run: rm -rf node_modules && npm install
-      - name: Build project
-        run: npm build
-      - name: Export static files
-        run: npm export -o build
+        run: pnpm install
+
+      - name: Build and export project
+        run: pnpm build && pnpm export -o build
+
       - name: Add .nojekyll file
         run: touch ./build/.nojekyll
+
       - name: Deploy
         uses: JamesIves/github-pages-deploy-action@4.1.1
         with:
