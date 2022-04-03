@@ -6,7 +6,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "export": "next export"
+    "export": "next export -o build"
   },
   "dependencies": {
     "@types/webgl2": "^0.0.6",
