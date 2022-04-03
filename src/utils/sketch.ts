@@ -1,21 +1,26 @@
 import { GPU } from "gpu.js";
 import p5Types from "p5";
 
-const width = 64;
-const height = 64;
+const width = 128;
+const height = 128;
 let cells: number[] = [];
 let loop = true;
 let gpu: GPU;
+let drawShader: p5Types.Shader;
+let canvas: p5Types.Renderer;
 
 export const setup = (p5: p5Types) => {
-  p5.createCanvas(p5.windowHeight, p5.windowHeight);
-  setupGPU();
+  canvas = p5.createCanvas(p5.windowHeight, p5.windowHeight, p5.WEBGL);
+  (canvas.elt as HTMLCanvasElement).addEventListener("contextmenu", (e) => e.preventDefault());
+
+  gpu = new GPU();
+  drawShader = p5.loadShader("shaders/draw.vert", "shaders/draw.frag");
 
   p5.background(0);
   p5.fill(255);
 
   randomize();
-  p5.frameRate(30);
+  // p5.frameRate(30);
 
   p5.keyReleased = () => {
     switch (p5.key) {
@@ -32,10 +37,6 @@ export const setup = (p5: p5Types) => {
         break;
     }
   };
-};
-
-const setupGPU = () => {
-  gpu = new GPU();
 };
 
 const index = (x: number, y: number) => {
@@ -102,54 +103,43 @@ const nextGen = () => {
 const paint = (p5: p5Types) => {
   p5.background(0);
 
-  // Draw Grid
-  p5.stroke(255, 255, 255, 64);
-  p5.strokeWeight(1);
-  for (let x = 0; x <= width; x++) {
-    p5.line(
-      (x * p5.windowHeight) / width,
-      0,
-      (x * p5.windowHeight) / width,
-      p5.windowHeight
-    );
-  }
-  for (let y = 0; y <= height; y++) {
-    p5.line(
-      0,
-      (y * p5.windowHeight) / height,
-      p5.windowHeight,
-      (y * p5.windowHeight) / height
-    );
-  }
-
-  p5.stroke(0);
-  p5.strokeWeight(1);
-
-  // Draw
-  for (let x = 0; x < width; x++) {
-    for (let y = 0; y < height; y++) {
-      if (cells[index(x, y)]) {
-        p5.rect(
-          (x * p5.width) / width,
-          (y * p5.height) / height,
-          p5.width / width,
-          p5.height / height
-        );
-      }
+  // convert cells to a p5 image texture
+  const cellsImage = p5.createImage(width, height);
+  const tex = (canvas as any).getTexture(cellsImage);
+  tex.setInterpolation(p5.NEAREST, p5.NEAREST);
+  cellsImage.loadPixels();
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const color = cells[index(x, y)] * 255;
+      cellsImage.set(x, y, [color, color, color, 255]);
     }
   }
+  cellsImage.updatePixels();
+
+  p5.shader(drawShader);
+  drawShader.setUniform("cells", cellsImage);
+  drawShader.setUniform("gridSize", [p5.width / width, p5.height / height]);
+  drawShader.setUniform("resolution", [p5.width, p5.height]);
+  drawShader.setUniform("enabledColor", [1.0, 1.0, 1.0, 1.0]);
+  drawShader.setUniform("disabledColor", [0.0, 0.0, 0.0, 1.0]);
+  drawShader.setUniform("gridColor", [0.1, 0.1, 0.1, 1.0]);
+
+
+  p5.quad(-1, -1, 1, -1, 1, 1, -1, 1);
 };
 
 export const draw = (p5: p5Types) => {
   if (loop) {
     nextGen();
-    paint(p5);
   }
 
   if (p5.mouseIsPressed) {
     const mouseX = Math.floor((p5.mouseX * width) / p5.width);
     const mouseY = Math.floor((p5.mouseY * height) / p5.height);
     cells[index(mouseX, mouseY)] = p5.mouseButton === p5.LEFT ? 1 : 0;
-    paint(p5);
   }
+
+  console.log(p5.frameRate());
+
+  paint(p5);
 };
