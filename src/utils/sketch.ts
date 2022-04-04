@@ -12,6 +12,7 @@ let canvas: p5Types.Renderer;
 export const setup = (p5: p5Types) => {
   canvas = p5.createCanvas(p5.windowHeight, p5.windowHeight, p5.WEBGL);
   (canvas.elt as HTMLCanvasElement).addEventListener("contextmenu", (e) => e.preventDefault());
+  p5.pixelDensity(1);
 
   gpu = new GPU();
   drawShader = p5.loadShader("shaders/draw.vert", "shaders/draw.frag");
