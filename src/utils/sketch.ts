@@ -53,6 +53,21 @@ export const setup = (p5: p5Types) => {
     const zoom = Math.exp(wheel * scaleSensitivity);
     const newScale = Math.max(scale * zoom, 1);
 
+    // // set new offset such that the mouse is at the same position
+    // // offset the distance btw the mouse and the center of the screen in the new scale
+
+    // // Values in the range [-1, 1]
+    // const mouseX = (p5.mouseX - p5.width / 2) / p5.width;
+    // const mouseY = (p5.mouseY - p5.height / 2) / p5.height;
+
+    // // Difference of the scaled mouse position and the center of the screen
+    // const scaleDiff = newScale - scale;
+
+    // // Offset in the new scale
+    // const newOffsetX = offset[0] + mouseX * scaleDiff;
+    // const newOffsetY = offset[1] + mouseY * scaleDiff;
+
+    // offset = [newOffsetX, newOffsetY];
     scale = newScale;
   };
 };
@@ -83,7 +98,8 @@ export const handleInput = (p5: p5Types) => {
       (p5.mouseX * width) / p5.width / scale + offset[0] * width
     );
     const mouseY = Math.floor(
-      ((p5.height - p5.mouseY) * height) / p5.height / scale + offset[1] * height
+      ((p5.height - p5.mouseY) * height) / p5.height / scale +
+        offset[1] * height
     );
     cells[index(mouseX, mouseY)] = p5.mouseButton === p5.LEFT ? 1 : 0;
   }

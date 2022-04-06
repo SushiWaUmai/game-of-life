@@ -22,6 +22,12 @@ void main(void)
     vec2 coord = gl_FragCoord.xy / _scale + _offset * _resolution;
     vec2 uv = coord / _resolution;
 
+    // check if the coordinate is inside the grid
+    if (uv.x < 0.0 || uv.x > 1.0 || uv.y < 0.0 || uv.y > 1.0)
+    {
+        discard;
+    }
+    
     // If the cell is enabled, draw it
     if (texture2D(_cells, uv).r > 0.5)
         gl_FragColor = _enabledColor;
