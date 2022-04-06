@@ -1,5 +1,6 @@
 import { clearGPU, gameOfLife, randomizeGPU, setupGPU } from "./compute";
 import p5Types from "p5";
+import { inputKeyMap, pressedEvent, releasedEvent } from "./input";
 
 const width = 128;
 const height = 128;
@@ -15,7 +16,8 @@ let gridThickness = 1;
 let offset = [0, 0];
 let scale = 1;
 
-const scaleSensitivity = 0.01;
+const scaleSensitivity = 0.1;
+const movementSpeed = 0.01;
 
 export const setup = (p5: p5Types) => {
   canvas = p5.createCanvas(p5.windowHeight, p5.windowHeight, p5.WEBGL);
@@ -37,18 +39,26 @@ export const setup = (p5: p5Types) => {
   randomize();
   p5.frameRate(30);
 
-  p5.keyReleased = () => {
+  p5.keyPressed = () => {
     setupInputCallback(p5);
+    pressedEvent(p5);
+  };
+
+  p5.keyReleased = () => {
+    releasedEvent(p5);
   };
 
   p5.mouseWheel = (event) => {
-    scale += (event as any).delta * scaleSensitivity;
-    scale = Math.max(1, scale);
+    const wheel = (event as any).deltaY < 0 ? 1 : -1;
+    const zoom = Math.exp(wheel * scaleSensitivity);
+    const newScale = Math.max(scale * zoom, 1);
+
+    scale = newScale;
   };
 };
 
 // Subscribe to the input event
-export const setupInputCallback = (p5: p5Types) => {
+const setupInputCallback = (p5: p5Types) => {
   switch (p5.key) {
     case " ":
       loop = !loop;
@@ -67,10 +77,29 @@ export const setupInputCallback = (p5: p5Types) => {
 
 // Handle Input
 export const handleInput = (p5: p5Types) => {
+  // Mouse Input
   if (p5.mouseIsPressed) {
-    const mouseX = Math.floor((p5.mouseX * width) / p5.width / scale + offset[0]);
-    const mouseY = Math.floor(((p5.height - p5.mouseY) * height) / p5.height / scale + offset[1]);
+    const mouseX = Math.floor(
+      (p5.mouseX * width) / p5.width / scale + offset[0] * width
+    );
+    const mouseY = Math.floor(
+      ((p5.height - p5.mouseY) * height) / p5.height / scale + offset[1] * height
+    );
     cells[index(mouseX, mouseY)] = p5.mouseButton === p5.LEFT ? 1 : 0;
+  }
+
+  // Handle Keyboard Input for movement
+  // x axis
+  if (inputKeyMap.a) {
+    offset[0] -= movementSpeed;
+  } else if (inputKeyMap.d) {
+    offset[0] += movementSpeed;
+  }
+  // y axis
+  if (inputKeyMap.w) {
+    offset[1] += movementSpeed;
+  } else if (inputKeyMap.s) {
+    offset[1] -= movementSpeed;
   }
 };
 
@@ -82,6 +111,9 @@ const index = (x: number, y: number) => {
 // Clear all cells
 const clear = () => {
   cells = clearGPU() as Float32Array;
+
+  offset = [0, 0];
+  scale = 1;
 };
 
 // Randomize cells

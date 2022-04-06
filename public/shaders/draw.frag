@@ -19,7 +19,7 @@ uniform float _gridThickness;
 
 void main(void)
 {
-    vec2 coord = gl_FragCoord.xy / _scale - (_offset * _resolution);
+    vec2 coord = gl_FragCoord.xy / _scale + _offset * _resolution;
     vec2 uv = coord / _resolution;
 
     // If the cell is enabled, draw it
