@@ -1,20 +1,32 @@
-import { GPU } from "gpu.js";
+import { GPU, IKernelRunShortcut } from "gpu.js";
 import p5Types from "p5";
 
 const width = 128;
 const height = 128;
-let cells: number[] = [];
+let cells: Float32Array;
 let loop = true;
-let gpu: GPU;
 let drawShader: p5Types.Shader;
 let canvas: p5Types.Renderer;
+let gameOfLife: IKernelRunShortcut;
+let clearGPU: IKernelRunShortcut;
+let randomizeGPU: IKernelRunShortcut;
+let cellsImage: p5Types.Graphics;
+let enabledColor = [1.0, 1.0, 1.0, 1.0];
+let disabledColor = [0.0, 0.0, 0.0, 1.0];
+let gridColor = [0.1, 0.1, 0.1, 1.0];
 
 export const setup = (p5: p5Types) => {
   canvas = p5.createCanvas(p5.windowHeight, p5.windowHeight, p5.WEBGL);
-  (canvas.elt as HTMLCanvasElement).addEventListener("contextmenu", (e) => e.preventDefault());
+  (canvas.elt as HTMLCanvasElement).addEventListener("contextmenu", (e) =>
+    e.preventDefault()
+  );
   p5.pixelDensity(1);
 
-  gpu = new GPU();
+  setupGPU();
+  cellsImage = p5.createGraphics(width, height);
+  const tex = (canvas as any).getTexture(cellsImage);
+  tex.setInterpolation(p5.NEAREST, p5.NEAREST);
+
   drawShader = p5.loadShader("shaders/draw.vert", "shaders/draw.frag");
 
   p5.background(0);
@@ -40,34 +52,10 @@ export const setup = (p5: p5Types) => {
   };
 };
 
-const index = (x: number, y: number) => {
-  return x + y * width;
-};
-
-const clear = () => {
-  const clearGPU = gpu
-    .createKernel(function () {
-      return 0;
-    })
-    .setOutput([width * height]);
-
-  cells = clearGPU() as number[];
-};
-
-const randomize = () => {
-  const randomizeGPU = gpu
-    .createKernel(function () {
-      return Math.random() > 0.5 ? 1 : 0;
-    })
-    .setOutput([width * height]);
-
-  cells = randomizeGPU() as number[];
-};
-
-const nextGen = () => {
-  // Next game of life step
-  const gameOfLife = gpu
-    .createKernel(function (cells: number[], width: number, height: number) {
+const setupGPU = () => {
+  const gpu = new GPU();
+  gameOfLife = gpu
+    .createKernel(function (cells: Float32Array, width: number, height: number) {
       const index = this.thread.x;
       const x = index % width;
       const y = Math.floor(index / width);
@@ -98,16 +86,40 @@ const nextGen = () => {
     })
     .setOutput([width * height]);
 
-  cells = gameOfLife(cells, width, height) as number[];
+  clearGPU = gpu
+    .createKernel(function () {
+      return 0;
+    })
+    .setOutput([width * height]);
+
+  randomizeGPU = gpu
+    .createKernel(function () {
+      return Math.random() > 0.5 ? 1 : 0;
+    })
+    .setOutput([width * height]);
+};
+
+const index = (x: number, y: number) => {
+  return x + y * width;
+};
+
+const clear = () => {
+  cells = clearGPU() as Float32Array;
+};
+
+const randomize = () => {
+  cells = randomizeGPU() as Float32Array;
+};
+
+const nextGen = () => {
+  // Next game of life step
+  cells = gameOfLife(cells, width, height) as Float32Array;
 };
 
 const paint = (p5: p5Types) => {
   p5.background(0);
 
   // convert cells to a p5 image texture
-  const cellsImage = p5.createImage(width, height);
-  const tex = (canvas as any).getTexture(cellsImage);
-  tex.setInterpolation(p5.NEAREST, p5.NEAREST);
   cellsImage.loadPixels();
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
@@ -121,12 +133,13 @@ const paint = (p5: p5Types) => {
   drawShader.setUniform("cells", cellsImage);
   drawShader.setUniform("gridSize", [p5.width / width, p5.height / height]);
   drawShader.setUniform("resolution", [p5.width, p5.height]);
-  drawShader.setUniform("enabledColor", [1.0, 1.0, 1.0, 1.0]);
-  drawShader.setUniform("disabledColor", [0.0, 0.0, 0.0, 1.0]);
-  drawShader.setUniform("gridColor", [0.1, 0.1, 0.1, 1.0]);
-
+  drawShader.setUniform("enabledColor", enabledColor);
+  drawShader.setUniform("disabledColor", disabledColor);
+  drawShader.setUniform("gridColor", gridColor);
 
   p5.quad(-1, -1, 1, -1, 1, 1, -1, 1);
+
+  cellsImage.remove();
 };
 
 export const draw = (p5: p5Types) => {
