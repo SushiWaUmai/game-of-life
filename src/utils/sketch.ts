@@ -1,4 +1,4 @@
-import { GPU, IKernelRunShortcut } from "gpu.js";
+import { clearGPU, gameOfLife, randomizeGPU, setupGPU } from "./compute";
 import p5Types from "p5";
 
 const width = 128;
@@ -7,9 +7,6 @@ let cells: Float32Array;
 let loop = true;
 let drawShader: p5Types.Shader;
 let canvas: p5Types.Renderer;
-let gameOfLife: IKernelRunShortcut;
-let clearGPU: IKernelRunShortcut;
-let randomizeGPU: IKernelRunShortcut;
 let cellsImage: p5Types.Graphics;
 let enabledColor = [1.0, 1.0, 1.0, 1.0];
 let disabledColor = [0.0, 0.0, 0.0, 1.0];
@@ -22,7 +19,7 @@ export const setup = (p5: p5Types) => {
   );
   p5.pixelDensity(1);
 
-  setupGPU();
+  setupGPU(width, height);
   cellsImage = p5.createGraphics(width, height);
   const tex = (canvas as any).getTexture(cellsImage);
   tex.setInterpolation(p5.NEAREST, p5.NEAREST);
@@ -36,83 +33,54 @@ export const setup = (p5: p5Types) => {
   p5.frameRate(30);
 
   p5.keyReleased = () => {
-    switch (p5.key) {
-      case " ":
-        loop = !loop;
-        break;
-      case "c":
-        clear();
-        paint(p5);
-        break;
-      case "r":
-        randomize();
-        paint(p5);
-        break;
-    }
+    setupInputCallback(p5);
   };
 };
 
-const setupGPU = () => {
-  const gpu = new GPU();
-  gameOfLife = gpu
-    .createKernel(function (cells: Float32Array, width: number, height: number) {
-      const index = this.thread.x;
-      const x = index % width;
-      const y = Math.floor(index / width);
-
-      const alive = cells[index];
-
-      let aliveNeighbors = 0;
-      for (let i = -1; i <= 1; i++) {
-        for (let j = -1; j <= 1; j++) {
-          const neighborX = (x + i + width) % width;
-          const neighborY = (y + j + height) % height;
-          aliveNeighbors += cells[neighborX + neighborY * width];
-        }
-      }
-      aliveNeighbors -= alive;
-
-      if (alive != 0) {
-        if (aliveNeighbors < 2 || aliveNeighbors > 3) {
-          return 0;
-        }
-      } else {
-        if (aliveNeighbors === 3) {
-          return 1;
-        }
-      }
-
-      return alive;
-    })
-    .setOutput([width * height]);
-
-  clearGPU = gpu
-    .createKernel(function () {
-      return 0;
-    })
-    .setOutput([width * height]);
-
-  randomizeGPU = gpu
-    .createKernel(function () {
-      return Math.random() > 0.5 ? 1 : 0;
-    })
-    .setOutput([width * height]);
+// Subscribe to the input event
+export const setupInputCallback = (p5: p5Types) => {
+  switch (p5.key) {
+    case " ":
+      loop = !loop;
+      break;
+    case "c":
+      clear();
+      break;
+    case "Enter":
+      nextGen();
+      break;
+    case "r":
+      randomize();
+      break;
+  }
 };
 
+// Handle Input
+export const handleInput = (p5: p5Types) => {
+  if (p5.mouseIsPressed) {
+    const mouseX = Math.floor((p5.mouseX * width) / p5.width);
+    const mouseY = Math.floor((p5.mouseY * height) / p5.height);
+    cells[index(mouseX, mouseY)] = p5.mouseButton === p5.LEFT ? 1 : 0;
+  }
+};
+
+// Get the index of the cell
 const index = (x: number, y: number) => {
   return x + y * width;
 };
 
+// Clear all cells
 const clear = () => {
   cells = clearGPU() as Float32Array;
 };
 
+// Randomize cells
 const randomize = () => {
   cells = randomizeGPU() as Float32Array;
 };
 
+// Next game of life step
 const nextGen = () => {
-  // Next game of life step
   cells = gameOfLife(cells, width, height) as Float32Array;
 };
 
@@ -129,6 +97,7 @@ const paint = (p5: p5Types) => {
   }
   cellsImage.updatePixels();
 
+  // Set Shader Uniform
   p5.shader(drawShader);
   drawShader.setUniform("cells", cellsImage);
   drawShader.setUniform("gridSize", [p5.width / width, p5.height / height]);
@@ -147,11 +116,6 @@ export const draw = (p5: p5Types) => {
     nextGen();
   }
 
-  if (p5.mouseIsPressed) {
-    const mouseX = Math.floor((p5.mouseX * width) / p5.width);
-    const mouseY = Math.floor((p5.mouseY * height) / p5.height);
-    cells[index(mouseX, mouseY)] = p5.mouseButton === p5.LEFT ? 1 : 0;
-  }
-
+  handleInput(p5);
   paint(p5);
 };
