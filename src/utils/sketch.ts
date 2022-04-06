@@ -11,6 +11,11 @@ let cellsImage: p5Types.Graphics;
 let enabledColor = [1.0, 1.0, 1.0, 1.0];
 let disabledColor = [0.0, 0.0, 0.0, 1.0];
 let gridColor = [0.1, 0.1, 0.1, 1.0];
+let gridThickness = 1;
+let offset = [0, 0];
+let scale = 1;
+
+const scaleSensitivity = 0.01;
 
 export const setup = (p5: p5Types) => {
   canvas = p5.createCanvas(p5.windowHeight, p5.windowHeight, p5.WEBGL);
@@ -35,6 +40,11 @@ export const setup = (p5: p5Types) => {
   p5.keyReleased = () => {
     setupInputCallback(p5);
   };
+
+  p5.mouseWheel = (event) => {
+    scale += (event as any).delta * scaleSensitivity;
+    scale = Math.max(1, scale);
+  };
 };
 
 // Subscribe to the input event
@@ -58,8 +68,8 @@ export const setupInputCallback = (p5: p5Types) => {
 // Handle Input
 export const handleInput = (p5: p5Types) => {
   if (p5.mouseIsPressed) {
-    const mouseX = Math.floor((p5.mouseX * width) / p5.width);
-    const mouseY = Math.floor((p5.mouseY * height) / p5.height);
+    const mouseX = Math.floor((p5.mouseX * width) / p5.width / scale + offset[0]);
+    const mouseY = Math.floor(((p5.height - p5.mouseY) * height) / p5.height / scale + offset[1]);
     cells[index(mouseX, mouseY)] = p5.mouseButton === p5.LEFT ? 1 : 0;
   }
 };
@@ -99,12 +109,15 @@ const paint = (p5: p5Types) => {
 
   // Set Shader Uniform
   p5.shader(drawShader);
-  drawShader.setUniform("cells", cellsImage);
-  drawShader.setUniform("gridSize", [p5.width / width, p5.height / height]);
-  drawShader.setUniform("resolution", [p5.width, p5.height]);
-  drawShader.setUniform("enabledColor", enabledColor);
-  drawShader.setUniform("disabledColor", disabledColor);
-  drawShader.setUniform("gridColor", gridColor);
+  drawShader.setUniform("_cells", cellsImage);
+  drawShader.setUniform("_gridSize", [p5.width / width, p5.height / height]);
+  drawShader.setUniform("_resolution", [p5.width, p5.height]);
+  drawShader.setUniform("_enabledColor", enabledColor);
+  drawShader.setUniform("_disabledColor", disabledColor);
+  drawShader.setUniform("_gridColor", gridColor);
+  drawShader.setUniform("_gridThickness", gridThickness);
+  drawShader.setUniform("_offset", offset);
+  drawShader.setUniform("_scale", scale);
 
   p5.quad(-1, -1, 1, -1, 1, 1, -1, 1);
 
