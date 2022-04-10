@@ -1,10 +1,10 @@
 import type { NextPage } from "next";
-import BackgroundComponent from "../components/BackgroundComponent";
+import SketchComponent from "../components/SketchComponent";
 
 const Home: NextPage = () => {
   return (
     <>
-      <BackgroundComponent />
+      <SketchComponent />
     </>
   );
 };
