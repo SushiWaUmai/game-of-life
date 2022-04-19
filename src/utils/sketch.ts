@@ -94,7 +94,6 @@ const sketch = (p5: P5Instance) => {
       const mouseY = Math.floor(
         ((1 - p5.mouseY / p5.height) * scale + offset[1]) * height
       );
-      console.log(mouseX, mouseY);
       cells[index(mouseX, mouseY)] = p5.mouseButton === p5.LEFT ? 1 : 0;
     }
 
