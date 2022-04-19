@@ -18,6 +18,9 @@ const sketch = (p5: P5Instance) => {
   let offset = [0, 0];
   let scale = 1;
 
+  let refreshRate = 5;
+  let refreshCounter = 0;
+
   const scaleSensitivity = 0.2;
   const movementSpeed = 0.01;
 
@@ -41,7 +44,7 @@ const sketch = (p5: P5Instance) => {
     p5.fill(255);
 
     randomize();
-    p5.frameRate(30);
+    p5.frameRate(60);
   };
 
   p5.keyPressed = () => {
@@ -173,7 +176,11 @@ const sketch = (p5: P5Instance) => {
 
   p5.draw = () => {
     if (loop) {
-      nextGen();
+      refreshCounter += p5.deltaTime / 1000;
+      if (refreshCounter > 1 / refreshRate) {
+        nextGen();
+        refreshCounter = 0;
+      }
     }
 
     handleInput();
