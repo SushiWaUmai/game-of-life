@@ -99,16 +99,17 @@ const sketch = (p5: P5Instance) => {
 
     // Handle Keyboard Input for movement
     // x axis
+    const speed = movementSpeed * scale;
     if (inputKeyMap.a) {
-      offset[0] -= movementSpeed;
+      offset[0] -= speed;
     } else if (inputKeyMap.d) {
-      offset[0] += movementSpeed;
+      offset[0] += speed;
     }
     // y axis
     if (inputKeyMap.w) {
-      offset[1] += movementSpeed;
+      offset[1] += speed;
     } else if (inputKeyMap.s) {
-      offset[1] -= movementSpeed;
+      offset[1] -= speed;
     }
   };
 
