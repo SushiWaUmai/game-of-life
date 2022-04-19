@@ -75,6 +75,9 @@ const sketch = (p5: P5Instance) => {
       case "c":
         clear();
         break;
+      case "k":
+        toDefaults();
+        break;
       case "Enter":
         nextGen();
         break;
@@ -121,9 +124,6 @@ const sketch = (p5: P5Instance) => {
   // Clear all cells
   const clear = () => {
     cells = clearGPU() as Float32Array;
-
-    offset = [0, 0];
-    scale = 1;
   };
 
   // Randomize cells
@@ -134,6 +134,11 @@ const sketch = (p5: P5Instance) => {
   // Next game of life step
   const nextGen = () => {
     cells = gameOfLife(cells, width, height) as Float32Array;
+  };
+
+  const toDefaults = () => {
+    offset = [0, 0];
+    scale = 1;
   };
 
   const paint = () => {
