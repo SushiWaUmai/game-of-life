@@ -8,18 +8,17 @@ uniform sampler2D _cells;
 uniform vec2 _resolution;
 uniform vec2 _gridSize;
 
-uniform float _scale;
-uniform vec2 _offset;
-
 uniform vec4 _enabledColor;
 uniform vec4 _disabledColor;
 uniform vec4 _gridColor;
 
+uniform float _scale;
+uniform vec2 _offset;
 uniform float _gridThickness;
 
 void main(void)
 {
-    vec2 coord = gl_FragCoord.xy / _scale + _offset * _resolution;
+    vec2 coord = gl_FragCoord.xy  * _scale + _offset * _resolution;
     vec2 uv = coord / _resolution;
 
     // check if the coordinate is inside the grid

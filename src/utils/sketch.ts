@@ -54,13 +54,15 @@ const sketch = (p5: P5Instance) => {
   };
 
   p5.mouseWheel = (event) => {
-    const wheel = (event as any).deltaY < 0 ? 1 : -1;
+    const wheel = (event as any).deltaY > 0 ? 1 : -1;
     const zoom = Math.exp(wheel * scaleSensitivity);
-    const newScale = Math.min(Math.max(scale * zoom, 1), 10);
+    const newScale = scale * zoom;
+    const scaleDiff = scale - newScale;
 
-    // TODO: set new offset such that the mouse is at the same position
-    // offset the distance btw the mouse and the center of the screen in the new scale
+    const newOffsetX = offset[0] + (p5.mouseX / p5.width) * scaleDiff;
+    const newOffsetY = offset[1] + (1 - p5.mouseY / p5.height) * scaleDiff;
 
+    offset = [newOffsetX, newOffsetY];
     scale = newScale;
   };
 
@@ -87,12 +89,12 @@ const sketch = (p5: P5Instance) => {
     // Mouse Input
     if (p5.mouseIsPressed) {
       const mouseX = Math.floor(
-        (p5.mouseX * width) / p5.width / scale + offset[0] * width
+        ((p5.mouseX / p5.width) * scale + offset[0]) * width
       );
       const mouseY = Math.floor(
-        ((p5.height - p5.mouseY) * height) / p5.height / scale +
-          offset[1] * height
+        ((1 - p5.mouseY / p5.height) * scale + offset[1]) * height
       );
+      console.log(mouseX, mouseY);
       cells[index(mouseX, mouseY)] = p5.mouseButton === p5.LEFT ? 1 : 0;
     }
 
