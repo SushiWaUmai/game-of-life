@@ -3,7 +3,6 @@ lockfileVersion: 5.3
 specifiers:
   '@types/node': 17.0.25
   '@types/react': 18.0.5
-  '@types/webgl2': ^0.0.6
   autoprefixer: ^10.4.4
   eslint: 8.13.0
   eslint-config-next: 12.1.5
@@ -17,7 +16,6 @@ specifiers:
   typescript: 4.6.3
 
 dependencies:
-  '@types/webgl2': 0.0.6
   gpu.js: 2.15.2
   next: 12.1.5_react-dom@18.0.0+react@18.0.0
   react: 18.0.0
@@ -253,10 +251,6 @@ packages:
   /@types/scheduler/0.16.2:
     resolution: {integrity: sha512-hppQEBDmlwhFAXKJX2KnWLYu5yMfi91yazPb2l+lbJiwW+wdo1gNeRA+3RgNSO39WYX2euey41KEwnqesU2Jew==}
     dev: true
-
-  /@types/webgl2/0.0.6:
-    resolution: {integrity: sha512-50GQhDVTq/herLMiqSQkdtRu+d5q/cWHn4VvKJtrj4DJAjo1MNkWYa2MA41BaBO1q1HgsUjuQvEOk0QHvlnAaQ==}
-    dev: false
 
   /@typescript-eslint/parser/5.10.1_eslint@8.13.0+typescript@4.6.3:
     resolution: {integrity: sha512-GReo3tjNBwR5RnRO0K2wDIDN31cM3MmDtgyQ85oAxAmC5K3j/g85IjP+cDfcqDsDDBf1HNKQAD0WqOYL8jXqUA==}
