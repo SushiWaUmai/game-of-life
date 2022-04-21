@@ -3,5 +3,9 @@
 @tailwind utilities;
 
 body {
-  @apply bg-chocolate font-zen text-lg text-orchid;
+  @apply bg-crayota font-zen text-lg text-bone;
+}
+
+.btn {
+  @apply transition ease-out hover:scale-110 ;
 }

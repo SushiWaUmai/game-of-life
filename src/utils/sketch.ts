@@ -4,26 +4,67 @@ import p5Types from "p5";
 import { inputKeyMap, pressedEvent, releasedEvent } from "./input";
 import { gunmetal, jungle, orchid } from "./colors";
 
-const sketch = (p5: P5Instance) => {
-  const width = 128;
-  const height = 128;
-  let cells: Float32Array;
-  let loop = true;
-  let drawShader: p5Types.Shader;
-  let canvas: p5Types.Renderer;
-  let cellsImage: p5Types.Graphics;
-  let enabledColor = orchid;
-  let disabledColor = jungle;
-  let gridColor = gunmetal;
-  let gridThickness = 1;
-  let offset = [0, 0];
-  let scale = 1;
+const width = 128;
+const height = 128;
+let cells: Float32Array;
+let loop = true;
+let drawShader: p5Types.Shader;
+let canvas: p5Types.Renderer;
+let cellsImage: p5Types.Graphics;
+let enabledColor = orchid;
+let disabledColor = jungle;
+let gridColor = gunmetal;
+let gridThickness = 1;
+let offset = [0, 0];
+let scale = 1;
 
+const scaleSensitivity = 0.2;
+const movementSpeed = 0.01;
+
+// Get the index of the cell
+const index = (x: number, y: number) => {
+  return x + y * width;
+};
+
+// Clear all cells
+export const clear = () => {
+  cells = clearGPU() as Float32Array;
+};
+
+// Randomize cells
+export const randomize = () => {
+  cells = randomizeGPU() as Float32Array;
+};
+
+// Next game of life step
+export const nextGen = () => {
+  cells = gameOfLife(cells, width, height) as Float32Array;
+};
+
+export const toDefaults = () => {
+  offset = [0, 0];
+  scale = 1;
+};
+
+export const toggleLoop = () => {
+  loop = !loop;
+};
+
+export const changeZoom = (wheel: number, x: number, y: number) => {
+  const zoom = Math.exp(wheel * scaleSensitivity);
+  const newScale = scale * zoom;
+  const scaleDiff = scale - newScale;
+
+  const newOffsetX = offset[0] + x * scaleDiff;
+  const newOffsetY = offset[1] + y * scaleDiff;
+
+  offset = [newOffsetX, newOffsetY];
+  scale = newScale;
+};
+
+const sketch = (p5: P5Instance) => {
   let refreshRate = 5;
   let refreshCounter = 0;
-
-  const scaleSensitivity = 0.2;
-  const movementSpeed = 0.01;
 
   p5.preload = () => {
     drawShader = p5.loadShader("shaders/draw.vert", "shaders/draw.frag");
@@ -59,22 +100,14 @@ const sketch = (p5: P5Instance) => {
 
   p5.mouseWheel = (event) => {
     const wheel = (event as any).deltaY > 0 ? 1 : -1;
-    const zoom = Math.exp(wheel * scaleSensitivity);
-    const newScale = scale * zoom;
-    const scaleDiff = scale - newScale;
-
-    const newOffsetX = offset[0] + (p5.mouseX / p5.width) * scaleDiff;
-    const newOffsetY = offset[1] + (1 - p5.mouseY / p5.height) * scaleDiff;
-
-    offset = [newOffsetX, newOffsetY];
-    scale = newScale;
+    changeZoom(wheel, p5.mouseX / p5.width, 1 - p5.mouseY / p5.height);
   };
 
   // Subscribe to the input event
   const setupInputCallback = () => {
     switch (p5.key) {
       case " ":
-        loop = !loop;
+        toggleLoop();
         break;
       case "c":
         clear();
@@ -95,13 +128,16 @@ const sketch = (p5: P5Instance) => {
   const handleInput = () => {
     // Mouse Input
     if (p5.mouseIsPressed) {
-      const mouseX = Math.floor(
-        ((p5.mouseX / p5.width) * scale + offset[0]) * width
-      );
-      const mouseY = Math.floor(
-        ((1 - p5.mouseY / p5.height) * scale + offset[1]) * height
-      );
-      cells[index(mouseX, mouseY)] = p5.mouseButton === p5.LEFT ? 1 : 0;
+      // check if mouse is in canvas
+      if (p5.mouseX < p5.width && p5.mouseY < p5.height) {
+        const mouseX = Math.floor(
+          ((p5.mouseX / p5.width) * scale + offset[0]) * width
+        );
+        const mouseY = Math.floor(
+          ((1 - p5.mouseY / p5.height) * scale + offset[1]) * height
+        );
+        cells[index(mouseX, mouseY)] = p5.mouseButton === p5.LEFT ? 1 : 0;
+      }
     }
 
     // Handle Keyboard Input for movement
@@ -118,31 +154,6 @@ const sketch = (p5: P5Instance) => {
     } else if (inputKeyMap.s) {
       offset[1] -= speed;
     }
-  };
-
-  // Get the index of the cell
-  const index = (x: number, y: number) => {
-    return x + y * width;
-  };
-
-  // Clear all cells
-  const clear = () => {
-    cells = clearGPU() as Float32Array;
-  };
-
-  // Randomize cells
-  const randomize = () => {
-    cells = randomizeGPU() as Float32Array;
-  };
-
-  // Next game of life step
-  const nextGen = () => {
-    cells = gameOfLife(cells, width, height) as Float32Array;
-  };
-
-  const toDefaults = () => {
-    offset = [0, 0];
-    scale = 1;
   };
 
   const paint = () => {
