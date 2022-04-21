@@ -2,6 +2,7 @@ import { clearGPU, gameOfLife, randomizeGPU, setupGPU } from "./compute";
 import { P5Instance } from "react-p5-wrapper";
 import p5Types from "p5";
 import { inputKeyMap, pressedEvent, releasedEvent } from "./input";
+import { chocolate, pine, sugar } from "./colors";
 
 const sketch = (p5: P5Instance) => {
   const width = 128;
@@ -11,9 +12,9 @@ const sketch = (p5: P5Instance) => {
   let drawShader: p5Types.Shader;
   let canvas: p5Types.Renderer;
   let cellsImage: p5Types.Graphics;
-  let enabledColor = [1.0, 1.0, 1.0, 1.0];
-  let disabledColor = [0.0, 0.0, 0.0, 1.0];
-  let gridColor = [0.1, 0.1, 0.1, 1.0];
+  let enabledColor = sugar;
+  let disabledColor = chocolate;
+  let gridColor = pine;
   let gridThickness = 1;
   let offset = [0, 0];
   let scale = 1;

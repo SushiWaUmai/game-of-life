@@ -22,8 +22,10 @@ void main(void)
     vec2 uv = coord / _resolution;
 
     // check if the coordinate is inside the grid
-    if (uv.x < 0.0 || uv.x > 1.0 || uv.y < 0.0 || uv.y > 1.0)
-        discard;
+    if (uv.x < 0.0 || uv.x > 1.0 || uv.y < 0.0 || uv.y > 1.0) {
+        gl_FragColor = _disabledColor;
+        return;
+    }
     
     // If the cell is enabled, draw it
     if (texture2D(_cells, uv).r > 0.5)
