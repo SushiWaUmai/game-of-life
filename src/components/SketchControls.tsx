@@ -44,13 +44,13 @@ const SketchControls: React.FC<SketchControlsProps> = () => {
 
       <div className="flex-shrink flex gap-x-3 flex-row-reverse">
         <button
-          className="bg-stone-800 btn py-1 px-3 rounded"
+          className="bg-stone-800 btn py-2 px-2 rounded"
           onClick={() => changeZoom(1, 0.5, 0.5)}
         >
           <BsZoomOut />
         </button>
         <button
-          className="bg-stone-800 btn py-1 px-3 rounded"
+          className="bg-stone-800 btn py-2 px-2 rounded"
           onClick={() => changeZoom(-1, 0.5, 0.5)}
         >
           <BsZoomIn />
