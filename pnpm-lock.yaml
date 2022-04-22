@@ -11,6 +11,7 @@ specifiers:
   postcss: ^8.4.12
   react: 18.0.0
   react-dom: 18.0.0
+  react-icons: ^4.3.1
   react-p5-wrapper: ^3.3.0
   tailwindcss: ^3.0.24
   typescript: 4.6.3
@@ -20,6 +21,7 @@ dependencies:
   next: 12.1.5_react-dom@18.0.0+react@18.0.0
   react: 18.0.0
   react-dom: 18.0.0_react@18.0.0
+  react-icons: 4.3.1_react@18.0.0
   react-p5-wrapper: 3.3.0_react-dom@18.0.0+react@18.0.0
 
 devDependencies:
@@ -2239,6 +2241,14 @@ packages:
       loose-envify: 1.4.0
       react: 18.0.0
       scheduler: 0.21.0
+    dev: false
+
+  /react-icons/4.3.1_react@18.0.0:
+    resolution: {integrity: sha512-cB10MXLTs3gVuXimblAdI71jrJx8njrJZmNMEMC+sQu5B/BIOmlsAjskdqpn81y8UBVEGuHODd7/ci5DvoSzTQ==}
+    peerDependencies:
+      react: '*'
+    dependencies:
+      react: 18.0.0
     dev: false
 
   /react-is/16.13.1:
