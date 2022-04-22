@@ -20,11 +20,15 @@ The game is played by clicking on the cells.
 
 1. Left click on a cell to make it alive.
 2. Right click on a cell to make it dead.
-3. Press the `Space` key to start the simulation. Press it again to stop it.
-4. Press `r` to randomize the board.
-5. Press `c` to clear the board.
-6. Press `Enter` to move to the next generation.
-
+3. Middle click and drag to select a region.
+4. Press the `Space` key to start the simulation. Press it again to stop it.
+5. Press `h` to randomize the board.
+6. Press `r` to reset the board.
+7. Press `k` to reset the position of the camera.
+8. Press `b` to remove the selected region.
+9. Press `c` to copy the current selected region.
+10. Press `v` to paste the copied region.
+11. Press `Enter` to move to the next generation.
 
 ## Development
 
