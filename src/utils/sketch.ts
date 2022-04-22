@@ -4,6 +4,12 @@ import p5Types from "p5";
 import { inputKeyMap, pressedEvent, releasedEvent } from "./input";
 import { gunmetal, jungle, orchid } from "./colors";
 
+interface SelectionPixels {
+  width: number;
+  height: number;
+  cells: Float32Array;
+}
+
 const width = 128;
 const height = 128;
 let cells: Float32Array;
@@ -17,12 +23,49 @@ let gridColor = gunmetal;
 let gridThickness = 1;
 let offset = [0, 0];
 let scale = 1;
+let selectionBox = [0, 0, -1, -1];
+let clipboard: SelectionPixels;
 
 const scaleSensitivity = 0.2;
 const movementSpeed = 0.01;
 
+const cellXYfromScreen = (x: number, resX: number, y: number, resY: number) => {
+  const mouseX = Math.floor(((x / resX) * scale + offset[0]) * width);
+  const mouseY = Math.floor(((1 - y / resY) * scale + offset[1]) * height);
+
+  return [mouseX, mouseY];
+};
+
+const screenXYfromCell = (x: number, resX: number, y: number, resY: number) => {
+  const screenX = Math.floor((((x + 1) / width - offset[0]) / scale) * resX);
+  const screenY = Math.floor(
+    (1 - ((y + 1) / height - offset[1]) / scale) * resY
+  );
+  return [screenX, screenY];
+};
+
+const screenRectFromCellRect = (
+  x1: number,
+  y1: number,
+  x2: number,
+  y2: number,
+  resX: number,
+  resY: number
+) => {
+  [x1, y1] = screenXYfromCell(x1 - 1, resX, y1 - 1, resY).map(
+    (v) => v - resX / 2
+  );
+  [x2, y2] = screenXYfromCell(x2, resX, y2, resY).map((v) => v - resY / 2);
+
+  return [x1, y1, x2, y2];
+};
+
 // Get the index of the cell
 const index = (x: number, y: number) => {
+  return x + y * width;
+};
+
+const indexFromWidth = (x: number, y: number, width: number) => {
   return x + y * width;
 };
 
@@ -44,10 +87,71 @@ export const nextGen = () => {
 export const toDefaults = () => {
   offset = [0, 0];
   scale = 1;
+  removeBox();
+};
+
+export const removeBox = () => {
+  selectionBox = [0, 0, -1, -1];
 };
 
 export const toggleLoop = () => {
   loop = !loop;
+};
+
+export const fillSelection = (val: number) => {
+  const [x1, y1, x2, y2] = selectionBox;
+  // enable cells in selection box
+  for (let y = y1; y <= y2; y++) {
+    for (let x = x1; x <= x2; x++) {
+      cells[index(x, y)] = val;
+    }
+  }
+};
+
+export const copySelection = () => {
+  const [x1, y1, x2, y2] = selectionBox;
+
+  // copy selection to clipboard
+  // get the cells from selection box
+  const selectionWidth = x2 - x1 + 1;
+  const selectionHeight = y2 - y1 + 1;
+
+  const selectionCells = new Float32Array(selectionWidth * selectionHeight);
+
+  for (let y = y1; y <= y2; y++) {
+    for (let x = x1; x <= x2; x++) {
+      selectionCells[indexFromWidth(x - x1, y - y1, selectionWidth)] =
+        cells[index(x, y)];
+    }
+  }
+
+  clipboard = {
+    width: selectionWidth,
+    height: selectionHeight,
+    cells: selectionCells,
+  };
+};
+
+export const pasteSelection = (x1: number, y1: number) => {
+  if (clipboard) {
+    const x2 = x1 + clipboard.width - 1;
+    const y2 = y1 + clipboard.height - 1;
+
+    for (let y = y1; y <= y2; y++) {
+      for (let x = x1; x <= x2; x++) {
+        cells[index(x, y)] =
+          clipboard.cells[indexFromWidth(x - x1, y - y1, clipboard.width)];
+      }
+    }
+
+    // update selection box
+    selectionBox = [x1, y1, x2, y2];
+  }
+};
+
+export const pasteFromMouse = (p5: P5Instance) => {
+  const [x, y] = cellXYfromScreen(p5.mouseX, p5.width, p5.mouseY, p5.height);
+  pasteSelection(x, y);
 };
 
 export const changeZoom = (wheel: number, x: number, y: number) => {
@@ -72,9 +176,13 @@ const sketch = (p5: P5Instance) => {
 
   p5.setup = () => {
     canvas = p5.createCanvas(p5.windowHeight, p5.windowHeight, p5.WEBGL);
-    (canvas.elt as HTMLCanvasElement).addEventListener("contextmenu", (e) =>
-      e.preventDefault()
-    );
+    const htmlCanvas = canvas.elt as HTMLCanvasElement;
+    htmlCanvas.addEventListener("contextmenu", (e) => e.preventDefault());
+    const gl = htmlCanvas.getContext("webgl");
+    if (!gl) return;
+
+    gl.disable(gl.DEPTH_TEST);
+
     p5.pixelDensity(1);
 
     setupGPU(width, height);
@@ -103,23 +211,77 @@ const sketch = (p5: P5Instance) => {
     changeZoom(wheel, p5.mouseX / p5.width, 1 - p5.mouseY / p5.height);
   };
 
+  p5.mousePressed = () => {
+    // check if middle mouse button
+    if (p5.mouseButton === p5.CENTER) {
+      const [mouseX, mouseY] = cellXYfromScreen(
+        p5.mouseX,
+        p5.width,
+        p5.mouseY,
+        p5.height
+      );
+
+      selectionBox = [mouseX, mouseY, mouseX, mouseY];
+    }
+  };
+
+  p5.mouseDragged = () => {
+    if (p5.mouseButton === p5.CENTER) {
+      const [cellX, cellY] = cellXYfromScreen(
+        p5.mouseX,
+        p5.width,
+        p5.mouseY,
+        p5.height
+      );
+
+      let [x1, y1] = selectionBox;
+      selectionBox = [x1, y1, cellX, cellY];
+
+      // keep selection box within grid
+      selectionBox = selectionBox.map((v) =>
+        Math.max(Math.min(v, width - 1), 0)
+      );
+    }
+  };
+
+  p5.mouseReleased = () => {
+    if (p5.mouseButton === p5.CENTER) {
+      const [x1, y1, x2, y2] = selectionBox;
+      // swap if necessary
+      if (x1 > x2) selectionBox = [x2, y1, x1, y2];
+      if (y1 > y2) selectionBox = [x1, y2, x2, y1];
+    }
+  };
+
   // Subscribe to the input event
   const setupInputCallback = () => {
     switch (p5.key) {
       case " ":
         toggleLoop();
         break;
-      case "c":
+      case "r":
         clear();
         break;
       case "k":
         toDefaults();
         break;
+      case "b":
+        removeBox();
+        break;
       case "Enter":
         nextGen();
         break;
-      case "r":
-        randomize();
+      case "e":
+        fillSelection(0);
+        break;
+      case "f":
+        fillSelection(1);
+        break;
+      case "c":
+        copySelection();
+        break;
+      case "v":
+        pasteFromMouse(p5);
         break;
     }
   };
@@ -130,13 +292,20 @@ const sketch = (p5: P5Instance) => {
     if (p5.mouseIsPressed) {
       // check if mouse is in canvas
       if (p5.mouseX < p5.width && p5.mouseY < p5.height) {
-        const mouseX = Math.floor(
-          ((p5.mouseX / p5.width) * scale + offset[0]) * width
+        const [mouseX, mouseY] = cellXYfromScreen(
+          p5.mouseX,
+          p5.width,
+          p5.mouseY,
+          p5.height
         );
-        const mouseY = Math.floor(
-          ((1 - p5.mouseY / p5.height) * scale + offset[1]) * height
-        );
-        cells[index(mouseX, mouseY)] = p5.mouseButton === p5.LEFT ? 1 : 0;
+        switch (p5.mouseButton) {
+          case p5.LEFT:
+            cells[index(mouseX, mouseY)] = 1;
+            break;
+          case p5.RIGHT:
+            cells[index(mouseX, mouseY)] = 0;
+            break;
+        }
       }
     }
 
@@ -181,9 +350,37 @@ const sketch = (p5: P5Instance) => {
     drawShader.setUniform("_offset", offset);
     drawShader.setUniform("_scale", scale);
 
-    p5.quad(-1, -1, 1, -1, 1, 1, -1, 1);
+    // prettier-ignore
+    {
+      p5.quad(
+        -1, -1,
+         1, -1,
+         1,  1,
+        -1,  1,
+      );
+    }
 
     cellsImage.remove();
+
+    p5.resetShader();
+
+    // Draw a box at selection
+    let [x1, y1, x2, y2] = selectionBox;
+    [x1, y1, x2, y2] = screenRectFromCellRect(
+      x1,
+      y1,
+      x2,
+      y2,
+      p5.width,
+      p5.height
+    );
+
+    p5.stroke(255);
+    p5.strokeWeight(3);
+    p5.line(x1, y1, x2, y1);
+    p5.line(x2, y1, x2, y2);
+    p5.line(x2, y2, x1, y2);
+    p5.line(x1, y2, x1, y1);
   };
 
   p5.draw = () => {
