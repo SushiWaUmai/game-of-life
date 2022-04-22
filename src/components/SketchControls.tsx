@@ -1,7 +1,9 @@
 import {
   changeZoom,
   clear,
+  loadClipboard,
   randomize,
+  saveClipboard,
   toDefaults,
   toggleLoop,
 } from "../utils/sketch";
@@ -14,7 +16,7 @@ const SketchControls: React.FC<SketchControlsProps> = () => {
     <div className="m-4 flex flex-col w-full">
       <h1 className="text-3xl">{"Conway's Game of Life"}</h1>
       <div className="my-5 flex-grow">
-        <div className="flex gap-x-5">
+        <div className="flex flex-wrap gap-5">
           <button
             className="bg-stone-800 btn py-1 px-3 rounded"
             onClick={() => clear()}
@@ -38,6 +40,19 @@ const SketchControls: React.FC<SketchControlsProps> = () => {
             onClick={() => toggleLoop()}
           >
             Toggle Loop
+          </button>
+
+          <button
+            className="bg-stone-800 btn py-1 px-3 rounded"
+            onClick={() => saveClipboard()}
+          >
+            Save region to file
+          </button>
+          <button
+            className="bg-stone-800 btn py-1 px-3 rounded"
+            onClick={() => loadClipboard()}
+          >
+            Load region from file
           </button>
         </div>
       </div>

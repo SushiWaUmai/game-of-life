@@ -108,6 +108,35 @@ export const fillSelection = (val: number) => {
   }
 };
 
+export const saveClipboard = () => {
+  const json = JSON.stringify(clipboard);
+  const blob = new Blob([json], { type: "application/json" });
+
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "cells.json";
+  a.click();
+};
+
+export const loadClipboard = () => {
+  const input = document.createElement("input");
+  input.type = "file";
+  input.accept = "application/json";
+  input.onchange = () => {
+    if (input.files) {
+      const file = input.files[0];
+      const reader = new FileReader();
+      reader.onload = () => {
+        const json = JSON.parse(reader.result as string);
+        clipboard = json;
+      };
+      reader.readAsText(file);
+    }
+  };
+  input.click();
+};
+
 export const copySelection = () => {
   const [x1, y1, x2, y2] = selectionBox;
 
