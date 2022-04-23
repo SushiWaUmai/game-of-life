@@ -14,7 +14,15 @@ interface SketchControlsProps {}
 const SketchControls: React.FC<SketchControlsProps> = () => {
   return (
     <div className="m-4 flex flex-col w-full">
-      <h1 className="text-3xl">{"Conway's Game of Life"}</h1>
+      <h1 className="text-3xl xl:text-5xl">{"Conway's Game of Life"}</h1>
+      <div className="m-2">
+        <a
+          href="https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life"
+          className="text-orchid inline-block btn btn-effect"
+        >
+          {"What is Conway's Game of Life?"}
+        </a>
+      </div>
       <div className="my-5 flex-grow">
         <div className="flex flex-wrap gap-5">
           <button
