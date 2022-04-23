@@ -4,7 +4,7 @@ import SketchControls from "../components/SketchControls";
 
 const Home: NextPage = () => {
   return (
-    <div className="flex">
+    <div className="flex flex-col lg:flex-row">
       <SketchComponent />
       <SketchControls />
     </div>

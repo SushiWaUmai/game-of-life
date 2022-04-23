@@ -9,6 +9,7 @@
     "export": "next export -o build"
   },
   "dependencies": {
+    "@headlessui/react": "^1.5.0",
     "gpu.js": "^2.15.2",
     "next": "12.1.5",
     "react": "18.0.0",

@@ -13,3 +13,7 @@ body {
 .btn-effect {
   @apply transition duration-200 border-b-2 border-transparent hover:border-orchid cursor-pointer;
 }
+
+.tab {
+  @apply flex-grow basis-1/3 hover:basis-1/2 transition ease-out bg-stone-800 px-5 py-3 rounded-t-lg border-2 border-stone-700;
+}

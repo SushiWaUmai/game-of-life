@@ -204,7 +204,8 @@ const sketch = (p5: P5Instance) => {
   };
 
   p5.setup = () => {
-    canvas = p5.createCanvas(p5.windowHeight, p5.windowHeight, p5.WEBGL);
+    const size = Math.min(p5.windowWidth, p5.windowHeight);
+    canvas = p5.createCanvas(size, size, p5.WEBGL);
     const htmlCanvas = canvas.elt as HTMLCanvasElement;
     htmlCanvas.addEventListener("contextmenu", (e) => e.preventDefault());
     const gl = htmlCanvas.getContext("webgl");
@@ -224,6 +225,11 @@ const sketch = (p5: P5Instance) => {
 
     randomize();
     p5.frameRate(60);
+
+    p5.windowResized = () => {
+      const size = Math.min(p5.windowWidth, p5.windowHeight);
+      p5.resizeCanvas(size, size);
+    };
   };
 
   p5.keyPressed = () => {
