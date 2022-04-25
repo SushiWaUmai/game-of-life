@@ -2,7 +2,7 @@ import { clearGPU, gameOfLife, randomizeGPU, setupGPU } from "./compute";
 import { P5Instance } from "react-p5-wrapper";
 import p5Types from "p5";
 import { inputKeyMap, pressedEvent, releasedEvent } from "./input";
-import { gunmetal, jungle, orchid } from "./colors";
+import { gunmetal, hexToRGBA, jungle, orchid, RGBAToHex } from "./colors";
 
 interface SelectionPixels {
   width: number;
@@ -26,6 +26,31 @@ let scale = 1;
 let selectionBox = [0, 0, -1, -1];
 let selectionMode = false;
 let clipboard: SelectionPixels;
+
+export const setEnabledColor = (hex: string) => {
+  const col = hexToRGBA(hex);
+  if (!col) return;
+
+  enabledColor = col;
+};
+
+export const getEnabledHex = () => RGBAToHex(enabledColor);
+export const getDisabledHex = () => RGBAToHex(disabledColor);
+export const getGridHex = () => RGBAToHex(gridColor);
+
+export const setDisabledColor = (hex: string) => {
+  const col = hexToRGBA(hex);
+  if (!col) return;
+
+  disabledColor = col;
+};
+
+export const setGridColor = (hex: string) => {
+  const col = hexToRGBA(hex);
+  if (!col) return;
+
+  gridColor = col;
+};
 
 const scaleSensitivity = 0.2;
 const movementSpeed = 0.01;
@@ -101,7 +126,7 @@ export const toggleLoop = () => {
 
 export const toggleSelection = () => {
   selectionMode = !selectionMode;
-}
+};
 
 export const fillSelection = (val: number) => {
   const [x1, y1, x2, y2] = selectionBox;
@@ -257,7 +282,7 @@ const sketch = (p5: P5Instance) => {
       selectionMode = true;
     }
 
-    if(selectionMode) {
+    if (selectionMode) {
       const [mouseX, mouseY] = cellXYfromScreen(
         p5.mouseX,
         p5.width,
@@ -270,7 +295,7 @@ const sketch = (p5: P5Instance) => {
   };
 
   p5.mouseDragged = () => {
-    if(selectionMode) {
+    if (selectionMode) {
       const [cellX, cellY] = cellXYfromScreen(
         p5.mouseX,
         p5.width,
@@ -289,7 +314,7 @@ const sketch = (p5: P5Instance) => {
   };
 
   p5.mouseReleased = () => {
-    if(selectionMode) {
+    if (selectionMode) {
       const [x1, y1, x2, y2] = selectionBox;
       // swap if necessary
       if (x1 > x2) selectionBox = [x2, y1, x1, y2];
