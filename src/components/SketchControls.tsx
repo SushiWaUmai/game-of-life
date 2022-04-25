@@ -6,6 +6,7 @@ import {
   saveClipboard,
   toDefaults,
   toggleLoop,
+  toggleSelection,
 } from "../utils/sketch";
 import { BsZoomIn, BsZoomOut } from "react-icons/bs";
 import { Tab } from "@headlessui/react";
@@ -57,6 +58,12 @@ const SketchControls: React.FC<SketchControlsProps> = () => {
                   onClick={() => toggleLoop()}
                 >
                   Toggle Loop
+                </button>
+                <button
+                  className="bg-stone-700 btn py-1 px-3 rounded"
+                  onClick={() => toggleSelection()}
+                >
+                  Toggle Selection
                 </button>
               </div>
             </Tab.Panel>

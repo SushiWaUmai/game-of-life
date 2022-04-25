@@ -24,6 +24,7 @@ let gridThickness = 1;
 let offset = [0, 0];
 let scale = 1;
 let selectionBox = [0, 0, -1, -1];
+let selectionMode = false;
 let clipboard: SelectionPixels;
 
 const scaleSensitivity = 0.2;
@@ -97,6 +98,10 @@ export const removeBox = () => {
 export const toggleLoop = () => {
   loop = !loop;
 };
+
+export const toggleSelection = () => {
+  selectionMode = !selectionMode;
+}
 
 export const fillSelection = (val: number) => {
   const [x1, y1, x2, y2] = selectionBox;
@@ -249,6 +254,10 @@ const sketch = (p5: P5Instance) => {
   p5.mousePressed = () => {
     // check if middle mouse button
     if (p5.mouseButton === p5.CENTER) {
+      selectionMode = true;
+    }
+
+    if(selectionMode) {
       const [mouseX, mouseY] = cellXYfromScreen(
         p5.mouseX,
         p5.width,
@@ -261,7 +270,7 @@ const sketch = (p5: P5Instance) => {
   };
 
   p5.mouseDragged = () => {
-    if (p5.mouseButton === p5.CENTER) {
+    if(selectionMode) {
       const [cellX, cellY] = cellXYfromScreen(
         p5.mouseX,
         p5.width,
@@ -280,11 +289,15 @@ const sketch = (p5: P5Instance) => {
   };
 
   p5.mouseReleased = () => {
-    if (p5.mouseButton === p5.CENTER) {
+    if(selectionMode) {
       const [x1, y1, x2, y2] = selectionBox;
       // swap if necessary
       if (x1 > x2) selectionBox = [x2, y1, x1, y2];
       if (y1 > y2) selectionBox = [x1, y2, x2, y1];
+    }
+
+    if (p5.mouseButton === p5.CENTER) {
+      selectionMode = false;
     }
   };
 
@@ -324,7 +337,7 @@ const sketch = (p5: P5Instance) => {
   // Handle Input
   const handleInput = () => {
     // Mouse Input
-    if (p5.mouseIsPressed) {
+    if (p5.mouseIsPressed && !selectionMode) {
       // check if mouse is in canvas
       if (p5.mouseX < p5.width && p5.mouseY < p5.height) {
         const [mouseX, mouseY] = cellXYfromScreen(
