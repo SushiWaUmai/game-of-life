@@ -7,7 +7,11 @@ export let randomizeGPU: IKernelRunShortcut;
 export const setupGPU = (width: number, height: number) => {
   const gpu = new GPU();
   gameOfLife = gpu
-    .createKernel(function (cells: Float32Array, width: number, height: number) {
+    .createKernel(function (
+      cells: Float32Array,
+      width: number,
+      height: number
+    ) {
       const index = this.thread.x;
       const x = index % width;
       const y = Math.floor(index / width);
