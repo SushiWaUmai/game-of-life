@@ -1,5 +1,5 @@
 import { clearGPU, gameOfLife, randomizeGPU, setupGPU } from "./compute";
-import { P5Instance } from "react-p5-wrapper";
+import { P5CanvasInstance } from "@p5-wrapper/react";
 import p5Types from "p5";
 import { inputKeyMap, pressedEvent, releasedEvent } from "./input";
 import { gunmetal, hexToRGBA, jungle, orchid, RGBAToHex } from "./colors";
@@ -65,7 +65,7 @@ const cellXYfromScreen = (x: number, resX: number, y: number, resY: number) => {
 const screenXYfromCell = (x: number, resX: number, y: number, resY: number) => {
   const screenX = Math.floor((((x + 1) / width - offset[0]) / scale) * resX);
   const screenY = Math.floor(
-    (1 - ((y + 1) / height - offset[1]) / scale) * resY
+    (1 - ((y + 1) / height - offset[1]) / scale) * resY,
   );
   return [screenX, screenY];
 };
@@ -76,10 +76,10 @@ const screenRectFromCellRect = (
   x2: number,
   y2: number,
   resX: number,
-  resY: number
+  resY: number,
 ) => {
   [x1, y1] = screenXYfromCell(x1 - 1, resX, y1 - 1, resY).map(
-    (v) => v - resX / 2
+    (v) => v - resX / 2,
   );
   [x2, y2] = screenXYfromCell(x2, resX, y2, resY).map((v) => v - resY / 2);
 
@@ -208,7 +208,7 @@ export const pasteSelection = (x1: number, y1: number) => {
   }
 };
 
-export const pasteFromMouse = (p5: P5Instance) => {
+export const pasteFromMouse = (p5: P5CanvasInstance) => {
   const [x, y] = cellXYfromScreen(p5.mouseX, p5.width, p5.mouseY, p5.height);
   pasteSelection(x, y);
 };
@@ -225,7 +225,7 @@ export const changeZoom = (wheel: number, x: number, y: number) => {
   scale = newScale;
 };
 
-const sketch = (p5: P5Instance) => {
+const sketch = (p5: P5CanvasInstance) => {
   let refreshRate = 5;
   let refreshCounter = 0;
 
@@ -287,7 +287,7 @@ const sketch = (p5: P5Instance) => {
         p5.mouseX,
         p5.width,
         p5.mouseY,
-        p5.height
+        p5.height,
       );
 
       selectionBox = [mouseX, mouseY, mouseX, mouseY];
@@ -300,7 +300,7 @@ const sketch = (p5: P5Instance) => {
         p5.mouseX,
         p5.width,
         p5.mouseY,
-        p5.height
+        p5.height,
       );
 
       let [x1, y1] = selectionBox;
@@ -369,7 +369,7 @@ const sketch = (p5: P5Instance) => {
           p5.mouseX,
           p5.width,
           p5.mouseY,
-          p5.height
+          p5.height,
         );
         switch (p5.mouseButton) {
           case p5.LEFT:
@@ -426,10 +426,14 @@ const sketch = (p5: P5Instance) => {
     // prettier-ignore
     {
       p5.quad(
-        -1, -1,
-         1, -1,
-         1,  1,
-        -1,  1,
+        -1,
+        -1,
+        1,
+        -1,
+        1,
+        1,
+        -1,
+        1,
       );
     }
 
@@ -445,7 +449,7 @@ const sketch = (p5: P5Instance) => {
       x2,
       y2,
       p5.width,
-      p5.height
+      p5.height,
     );
 
     p5.stroke(255);

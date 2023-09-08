@@ -10,12 +10,12 @@
   },
   "dependencies": {
     "@headlessui/react": "^1.7.17",
+    "@p5-wrapper/react": "^4.2.0",
     "gpu.js": "^2.16.0",
     "next": "13.4.19",
     "react": "18.2.0",
     "react-dom": "18.2.0",
-    "react-icons": "^4.11.0",
-    "react-p5-wrapper": "^3.3.0"
+    "react-icons": "^4.11.0"
   },
   "devDependencies": {
     "@types/node": "20.5.9",

@@ -8,6 +8,9 @@ dependencies:
   '@headlessui/react':
     specifier: ^1.7.17
     version: 1.7.17(react-dom@18.2.0)(react@18.2.0)
+  '@p5-wrapper/react':
+    specifier: ^4.2.0
+    version: 4.2.0(react-dom@18.2.0)(react@18.2.0)
   gpu.js:
     specifier: ^2.16.0
     version: 2.16.0
@@ -23,9 +26,6 @@ dependencies:
   react-icons:
     specifier: ^4.11.0
     version: 4.11.0(react@18.2.0)
-  react-p5-wrapper:
-    specifier: ^3.3.0
-    version: 3.4.0(react-dom@18.2.0)(react@18.2.0)
 
 devDependencies:
   '@types/node':
@@ -303,6 +303,18 @@ packages:
     engines: {node: ^14.17.0 || ^16.13.0 || >=18.0.0}
     dependencies:
       semver: 7.5.4
+    dev: false
+
+  /@p5-wrapper/react@4.2.0(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-LOTd/1W8sPiXo7/U0PwapsoOf74DQAFMibovvhrB+aImYNXbg+5xoAadnmgC28OBySeBNKXwchWhF1ctf6Pnpw==}
+    peerDependencies:
+      react: '>= 18.2.0'
+      react-dom: '>= 18.2.0'
+    dependencies:
+      microdiff: 1.3.2
+      p5: 1.7.0
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
     dev: false
 
   /@pkgjs/parseargs@0.11.0:
@@ -2743,19 +2755,6 @@ packages:
   /react-is@16.13.1:
     resolution: {integrity: sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==}
     dev: true
-
-  /react-p5-wrapper@3.4.0(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-YkcdS6T5zLLEiuC/U+0MCI5EMHfTWVwbcf+7ZeV1AOpQ+Eab9VlxIXZ9oltvwc86++FZmX3tiJR1YHakYt0sfQ==}
-    deprecated: This package has now been renamed to '@p5-wrapper/react' as of version 4.1.2 onwards. Please update the dependency name in your package.json to recieve future updates and features.
-    peerDependencies:
-      react: '>= 17.0.2'
-      react-dom: '>= 17.0.2'
-    dependencies:
-      microdiff: 1.3.2
-      p5: 1.7.0
-      react: 18.2.0
-      react-dom: 18.2.0(react@18.2.0)
-    dev: false
 
   /react@18.2.0:
     resolution: {integrity: sha512-/3IjMdb2L9QbBdWiW5e3P2/npwMBaU9mHCSCUzNln0ZCYbcfTsGbTJrU/kGemdH2IWmB2ioZ+zkxtmq6g09fGQ==}
