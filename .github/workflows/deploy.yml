@@ -27,6 +27,14 @@ jobs:
           sudo apt update
           sudo apt install -y build-essential libxi-dev libglu1-mesa-dev libglew-dev pkg-config
 
+      - uses: actions/cache@v3
+        name: Setup pnpm cache
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
       - name: Install packages
         run: pnpm install
 
